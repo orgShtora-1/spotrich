@@ -5,6 +5,16 @@ may still have incompatible changes, which should be recorded here.
 
 ## [0.1.1] — 2026-10-27
 
+### Added
+
+- **`/sse` subpath** — `createSpotifySSE(options)` and `handleSSEResponse(request, options)` for real-time Server-Sent Events streaming of playback snapshots and progress
+- SSE stream emits typed events: `open` (connection established), `track` (snapshot), `progress` (ProgressEstimate), `error` (with `willRetry`)
+- Configurable heartbeat interval (`heartbeatMs`, default 15 s) to prevent proxy timeouts
+- Configurable progress update interval (`progressIntervalMs`, default 1 s) for smooth progress bars
+- Optional `market` parameter for territory-aware track availability
+- SSE stream auto-cleans up on client disconnect via `AbortController` and `client.destroy()`
+- Package exports now include `./sse` subpath alongside existing `.` `./oauth` e `./http`
+
 ### Fixed
 
 - **A01**: 429 cooldown with numeric `Retry-After` is now protected against concurrency; `QUOTA_EXCEEDED` responses without reset do not wipe known deadlines installed by concurrent callers.

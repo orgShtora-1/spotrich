@@ -1,7 +1,7 @@
 {
   "name": "@shtora/spotrich",
-  "version": "0.1.0",
-  "description": "Dependency-free, Web Standards Spotify playback snapshots, OAuth and adaptive polling.",
+  "version": "0.1.1",
+  "description": "Dependency-free, Web Standards Spotify playback snapshots, OAuth, adaptive polling, and real-time SSE streaming.",
   "type": "module",
   "license": "MIT",
   "sideEffects": false,
@@ -11,6 +11,7 @@
     ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js", "default": "./dist/index.js" },
     "./oauth": { "types": "./dist/oauth.d.ts", "import": "./dist/oauth.js", "default": "./dist/oauth.js" },
     "./http": { "types": "./dist/http.d.ts", "import": "./dist/http.js", "default": "./dist/http.js" },
+    "./sse": { "types": "./dist/sse.d.ts", "import": "./dist/sse.js", "default": "./dist/sse.js" },
     "./package.json": "./package.json"
   },
   "files": ["dist", "README.md", "LICENSE", ".env.example", "examples"],

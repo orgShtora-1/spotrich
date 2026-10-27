@@ -2,7 +2,7 @@
 
 Headless client for reading Spotify playback: typed snapshots, server-side OAuth, per-account cache, and adaptive polling. ESM, Web Standards, and **zero runtime dependencies**. It does not play audio or control the player, and does not offer Spotify's global push.
 
-**0.1.0, pre-release.** Publication and ownership of the `@shtora` npm scope still need to be authorized. The commands below describe package consumption when available; they do not assert the package already exists in the registry.
+**0.1.1, pre-release.** Publication and ownership of the `@shtora` npm scope still need to be authorized. The commands below describe package consumption when available; they do not assert the package already exists in the registry.
 
 ## Installation
 
@@ -66,8 +66,37 @@ The `refreshToken` seed above is kept only on the instance: it does not persist 
 | `@shtora/spotrich` | `createSpotifyClient`, `SpotifyError`, types; snapshot, state, history, estimate, and subscription | [API](API.md#root-client) |
 | `@shtora/spotrich/oauth` | `createSpotifyOAuth`, `createTokenProvider`, `createMemoryTransactionStore` and store contracts | [OAuth](OAUTH.md) |
 | `@shtora/spotrich/http` | `createNowPlayingHandler({ authorize })`, Web Request → private Response | [HTTP](API.md#http-adapter) |
+| `@shtora/spotrich/sse` | `createSpotifySSE`, `handleSSEResponse` — Server-Sent Events streaming for real-time playback | See above |
 
-There is no React hook, framework dependency, SSE, or WebSocket. The browser consumes an **authenticated endpoint on your own backend**, never the OAuth provider.
+There is no React hook or framework dependency. The browser consumes an **authenticated endpoint on your own backend** — either via the SSE module or standard fetch against the HTTP adapter, never the OAuth provider directly.
+
+## SSE streaming (real-time updates)
+
+The `/sse` subpath exports `createSpotifySSE` and `handleSSEResponse` for Server-Sent Events:
+
+```js
+import { handleSSEResponse } from '@shtora/spotrich/sse';
+
+// In a Next.js route handler:
+export async function GET(request) {
+  return handleSSEResponse(request, { auth: spotify });
+}
+```
+
+On the client:
+```js
+const source = new EventSource('/api/now-playing');
+source.addEventListener('track', (e) => console.log(JSON.parse(e.data)));
+source.addEventListener('progress', (e) => console.log(JSON.parse(e.data)));
+source.addEventListener('error', (e) => console.warn(JSON.parse(e.data)));
+```
+
+Events:
+- `open` — connection established
+- `track` — full `NowPlaying` snapshot
+- `progress` — `ProgressEstimate` (live progress when playing)
+- `error` — error with `willRetry` flag
+
 [Workers, Next.js and Vercel](examples/README.md#web-adapters) have deny-by-default modules; [other integrations](COMPATIBILITY.md#integration-recipes) are pattern-based recipes, not compatibility proof.
 
 ## Behavior and limits
