@@ -1,0 +1,37 @@
+{
+  "name": "@shtora/spotrich",
+  "version": "0.1.0",
+  "description": "Dependency-free, Web Standards Spotify playback snapshots, OAuth and adaptive polling.",
+  "type": "module",
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js", "default": "./dist/index.js" },
+    "./oauth": { "types": "./dist/oauth.d.ts", "import": "./dist/oauth.js", "default": "./dist/oauth.js" },
+    "./http": { "types": "./dist/http.d.ts", "import": "./dist/http.js", "default": "./dist/http.js" },
+    "./package.json": "./package.json"
+  },
+  "files": ["dist", "README.md", "LICENSE", ".env.example", "examples"],
+  "engines": { "node": ">=24.18.0" },
+  "packageManager": "bun@1.4.2",
+  "publishConfig": { "access": "public" },
+  "keywords": ["spotify", "now-playing", "oauth", "pkce", "edge", "typescript"],
+  "scripts": {
+    "clean": "node scripts/clean.mjs",
+    "build": "node scripts/clean.mjs && tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tests/types/tsconfig.json",
+    "lint": "node scripts/check.mjs",
+    "test": "node --test tests/*.test.mjs scripts/tooling.test.mjs examples/smoke.test.mjs",
+    "test:bun": "bun test tests/*.test.mjs scripts/tooling.test.mjs examples/smoke.test.mjs",
+    "test:compat": "node scripts/compat.mjs",
+    "test:live": "node scripts/live.mjs",
+    "bench": "node benchmarks/core.mjs",
+    "check": "bun run lint && bun run build && bun run typecheck && bun run test && bun run test:bun",
+    "prepublishOnly": "bun run check"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2"
+  }
+}

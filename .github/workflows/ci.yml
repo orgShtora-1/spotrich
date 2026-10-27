@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  core:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6; see ACTION_PINS.md
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24.18.0'
+          package-manager-cache: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: '1.4.2'
+      - name: Observe tool versions
+        run: node --version && npm --version && bun --version
+      - name: Reproducible install, no lifecycle scripts
+        run: bun install --frozen-lockfile --ignore-scripts
+      - name: Core static policy and JS syntax
+        run: bun run lint
+      - name: Tooling regression checks
+        run: node --test scripts/tooling.test.mjs
+      - name: Build ESM and declarations
+        run: bun run build
+      - name: Strict exported types
+        run: |
+          bun run typecheck
+          node node_modules/typescript/bin/tsc -p tests/types/tsconfig.bundler.json
+      - name: Node tests
+        run: bun run test
+      - name: Bun tests (actual JS)
+        run: bun run test:bun
+      - name: Actual npm pack, isolated Node/Bun consumers, types and runtime audit
+        run: node scripts/package-test.mjs --bun --audit
+      - name: Audit root build tool lockfile
+        run: bun audit --audit-level=low
+      - name: Mocked benchmark request-count contracts (no timing gate)
+        run: node benchmarks/core.mjs
+
+  compatibility:
+    # Separate consumers/jobs prove the packed package, not repository aliases.
+    # No cloud credentials, deployment actions, publication, or privileged trigger.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [workers, next, vercel]
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24.18.0'
+          package-manager-cache: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: '1.4.2'
+      - run: bun install --frozen-lockfile --ignore-scripts
+      - run: bun run build
+      - name: Install locked fixture without scripts and require its local runtime
+        env:
+          COMPAT_TARGET: ${{ matrix.target }}
+        run: node scripts/compat.mjs --install "$COMPAT_TARGET"

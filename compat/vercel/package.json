@@ -1,0 +1,12 @@
+{
+  "name": "spotrich-compat-vercel-edge-emulator",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": { "test": "node run.mjs" },
+  "dependencies": { "@shtora/spotrich": "file:./spotrich.tgz" },
+  "devDependencies": {
+    "@edge-runtime/vm": "5.0.0",
+    "esbuild": "0.28.2"
+  }
+}

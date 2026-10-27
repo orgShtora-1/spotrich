@@ -1,0 +1,16 @@
+{
+  "name": "spotrich-compat-workers",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": { "test": "node run.mjs" },
+  "dependencies": { "@shtora/spotrich": "file:./spotrich.tgz" },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "miniflare": "4.20260730.0"
+  },
+  "overrides": {
+    "sharp": ">=0.35.4",
+    "undici": ">=7.30.1"
+  }
+}
